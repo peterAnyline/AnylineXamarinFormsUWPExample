@@ -1,0 +1,31 @@
+﻿<Page
+    x:Class="AnylineExample.UWP.ExamplePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+          x:Name="RootGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="200"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <StackPanel HorizontalAlignment="Stretch" x:Name="TopElement" Grid.Row="0" VerticalAlignment="Stretch">
+            <Button x:Name="BtnScan" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="15" Content="Open Scanner"/>
+            <RadioButton x:Name="RBMeterScan" Content="Meters" IsChecked="True" GroupName="case"/>
+            <RadioButton x:Name="RBSerialNumberScan" Content="Serial Number" GroupName="case"/>
+            <RadioButton x:Name="RBPhotoHighRes" Content="Photos (High Res)" GroupName="case"/>
+            <RadioButton x:Name="RBPhotoLowRes" Content="Photos (Low Res)" GroupName="case"/>
+        </StackPanel>
+        <Grid x:Name="BottomElement" Grid.Row="1" VerticalAlignment="Stretch">
+            <ScrollViewer VerticalScrollBarVisibility="Visible"
+                              VerticalScrollMode="Enabled"
+                              x:Name="ResultScrollViewer" HorizontalAlignment="Stretch">
+                <ListView x:Name="ResultListView" VerticalAlignment="Top">
+                </ListView>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Page>
