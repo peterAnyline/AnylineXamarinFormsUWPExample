@@ -1,14 +1,23 @@
-﻿using Anyline.SDK.Plugins;
+﻿using Anyline.SDK.Models;
+using Anyline.SDK.Modules.Energy;
+using Anyline.SDK.Plugins;
+using Anyline.SDK.Plugins.Barcode;
 using Anyline.SDK.Plugins.Meter;
+using Anyline.SDK.Util;
+using Anyline.SDK.Views;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.Data.Json;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -19,7 +28,7 @@ using Windows.UI.Xaml.Navigation;
 
 namespace Scanner
 {
-    public sealed partial class MainPage : Page, IScanResultListener<MeterScanResult>
+    public sealed partial class MainPage : Page, IScanResultListener<MeterScanResult>, IScanResultListener<BarcodeScanResult>, IPhotoCaptureListener
     {
 
         private Windows.System.ProtocolForResultsOperation _operation = null;
@@ -28,14 +37,15 @@ namespace Scanner
         public readonly string LICENSE_KEY = "eyAiYW5kcm9pZElkZW50aWZpZXIiOiBbICJhbnlsaW5lLnV3cC50ZXN0YXBwIiBdLCAiZGVidWdSZXBvcnRpbmciOiAib24iLCAiaW9zSWRlbnRpZmllciI6IFsgImFueWxpbmUudXdwLnRlc3RhcHAiIF0sICJsaWNlbnNlS2V5VmVyc2lvbiI6IDIsICJtYWpvclZlcnNpb24iOiAiNCIsICJtYXhEYXlzTm90UmVwb3J0ZWQiOiAwLCAicGluZ1JlcG9ydGluZyI6IHRydWUsICJwbGF0Zm9ybSI6IFsgImlPUyIsICJBbmRyb2lkIiwgIldpbmRvd3MiIF0sICJzY29wZSI6IFsgIkFMTCIgXSwgInNob3dQb3BVcEFmdGVyRXhwaXJ5IjogZmFsc2UsICJzaG93V2F0ZXJtYXJrIjogdHJ1ZSwgInRvbGVyYW5jZURheXMiOiA5MCwgInZhbGlkIjogIjIwMTktMDQtMTAiLCAid2luZG93c0lkZW50aWZpZXIiOiBbICJhbnlsaW5lLnV3cC50ZXN0YXBwIiBdIH0KUStwSG9jRXlDYnQyKzlTQzdxSUFIc1Z2b2tIdVFBRTdpdEFDQ3FycjZJd3V6RDFKL05aWGpvZ1VKZmdZVmE3cwpvWlVKbGplZ3psQUJ4Vk5oNmplaXlQL0k1M3NUTFNleUd0cEdGNkV0SjB3TytLTW91ajVrNVpOeVhNUzJoWGlrCmZuV1VhblkrdTZOTS9OclBEZDhPbm9RT2JvREdUK1hubkZLSkhxQUZtc0pTVlpqcUJaUkpUQ2l1SUUyTjFZSXYKS3dLSS9NQklyV2hNcm1xSnczZVJ4dURRS3hxWFVmSktWZUR5VTBIbndsT25yN2hXMWczT05sbytkcGlMM1JYMQpQYkU3b1ZKcXpkLzl0S0syYzlKdUU2L2hxSGd3cjBvdDYwcUp2TUNpWlR2eis5eFF6T2lLMWVJMWM3bXBPOXpsClhlcjIxcGg1SkdRL0FRMW16ZXpkNWc9PQo=";
 
 
-        private MeterScanViewPlugin _meterScanViewPlugin;
+        //private MeterScanViewPlugin _meterScanViewPlugin;
+        private IScanViewPlugin _scanViewPlugin;
 
         public MainPage()
         {
             this.InitializeComponent();
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs args)
+        protected override async void OnNavigatedTo(NavigationEventArgs args)
         {
             try
             {
@@ -47,11 +57,22 @@ namespace Scanner
                     string dataFromCaller = protocolForResultsArgs.Data["jsonConfig"] as string;
 
                     JsonObject config = JsonObject.Parse(dataFromCaller);
-
+                    
                     AnylineScanView.Init(config, LICENSE_KEY);
-                    _meterScanViewPlugin = AnylineScanView.ScanViewPlugin as MeterScanViewPlugin;
+                    _scanViewPlugin = AnylineScanView.ScanViewPlugin;
 
-                    _meterScanViewPlugin.AddScanResultListener(this);
+                    // TODO: test if still necessary
+                    ResourceManager.MemoryCollectionRate = MemoryCollectionRate.Always;
+
+                    if (_scanViewPlugin is MeterScanViewPlugin)
+                    {
+                        (_scanViewPlugin as MeterScanViewPlugin).AddScanResultListener(this);
+                        (_scanViewPlugin as MeterScanViewPlugin).PhotoCaptureListener = this;
+                        (_scanViewPlugin as MeterScanViewPlugin).PhotoCaptureTarget = PhotoCaptureTarget.File;
+                    }
+
+                    if (_scanViewPlugin is BarcodeScanViewPlugin)
+                        (_scanViewPlugin as BarcodeScanViewPlugin).AddScanResultListener(this);
 
                     AnylineScanView.CameraView.CameraOpened += CameraView_CameraOpened;
 
@@ -65,31 +86,76 @@ namespace Scanner
                 {
                     { "exception", JsonValue.CreateStringValue(e.Message) }
                 };
-                SendResult(exJson.ToString());
+                await SendResultAsync(exJson);
             }
         }
 
         private void CameraView_CameraOpened(object sender, Size e)
         {
-            if (_meterScanViewPlugin != null && !_meterScanViewPlugin.IsScanning())
+            if (_scanViewPlugin != null && !_scanViewPlugin.IsScanning())
             {
-                _meterScanViewPlugin.StartScanning();
+                _scanViewPlugin.StartScanning();
             }
         }
 
-        private void SendResult(string result)
+        private async Task SendResultAsync(JsonObject result)
         {
-            ValueSet val = new ValueSet
+            ValueSet val = new ValueSet();
+            
+            try
             {
-                ["result"] = result
-            };
-            _operation.ReportCompleted(val);
+                if (result.ContainsKey("imagePath"))
+                {
+                    var imagePath = result["imagePath"].GetString();
+                    var imageFile = await StorageFile.GetFileFromPathAsync(imagePath);
+                    result.Add("imagePathToken", JsonValue.CreateStringValue(SharedStorageAccessManager.AddFile(imageFile)));
+                }
+
+                if (result.ContainsKey("fullImagePath"))
+                {
+                    var imagePath = result["fullImagePath"].GetString();
+                    var imageFile = await StorageFile.GetFileFromPathAsync(imagePath);
+                    result.Add("fullImagePathToken", JsonValue.CreateStringValue(SharedStorageAccessManager.AddFile(imageFile)));
+                }
+                val["result"] = result.ToString();
+            }
+            catch (Exception e)
+            {
+                val["exception"] = e.Message;
+            }
+            finally
+            {
+                _operation.ReportCompleted(val);
+            }
+        }
+        
+
+        public async void OnResult(MeterScanResult result)
+        {
+            // the AnylineImages are saved whithin the ToJson() method
+            var jsonResult = result.ToJson();
+            await SendResultAsync(jsonResult);
         }
 
-        public void OnResult(MeterScanResult result)
+        public async void OnResult(BarcodeScanResult result)
         {
-            var jsonResult = result.ToJson().ToString();
-            SendResult(jsonResult);
+            // the AnylineImages are saved whithin the ToJson() method
+            var jsonResult = result.ToJson();
+            await SendResultAsync(jsonResult);
+        }
+
+        public void OnPhotoCaptured(AnylineImage anylineImage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async void OnPhotoToFile(StorageFile file)
+        {
+            JsonObject result = new JsonObject();
+            result.Add("imagePathToken", JsonValue.CreateStringValue(SharedStorageAccessManager.AddFile(file)));
+
+            await SendResultAsync(result);
+            
         }
     }
 }

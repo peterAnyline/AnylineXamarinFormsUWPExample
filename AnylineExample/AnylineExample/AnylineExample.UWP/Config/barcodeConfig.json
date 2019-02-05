@@ -12,9 +12,8 @@
   },
   "viewPlugin": {
     "plugin": {
-      "id": "METER",
-      "meterPlugin": {
-        "scanMode": "AUTO_ANALOG_DIGITAL_METER"
+      "id": "BARCODE",
+      "barcodePlugin": {
       }
     },
     "cutoutConfig": {
@@ -22,8 +21,8 @@
       "width": 700,
       "alignment": "top_half",
       "ratioFromSize": {
-        "width": 10,
-        "height": 7
+        "width": 1,
+        "height": 1
       },
       "strokeWidth": 2,
       "strokeColor": "FFFFFF",
@@ -31,8 +30,8 @@
       "outerColor": "000000",
       "outerAlpha": 0.5,
       "feedbackStrokeColor": "0099FF",
-      "maxWidthPercent": "80%",
-      "maxHeightPercent": "80%",
+      "maxWidthPercent": "60%",
+      "maxHeightPercent": "60%",
       "offset": {
         "x": 0,
         "y": 0
@@ -47,7 +46,7 @@
       }
     },
     "scanFeedback": {
-      "style": "CONTOUR_RECT",
+      "style": "RECT",
       "strokeColor": "0099FF",
       "strokeWidth": 2,
       "fillColor": "220099FF",

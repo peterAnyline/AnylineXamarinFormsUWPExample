@@ -1,6 +1,6 @@
 ﻿{
   "camera": {
-    "captureResolution": "720p",
+    "captureResolution": "1080p",
     "pictureResolution": "Photo"
   },
   "flash": {
@@ -14,16 +14,16 @@
     "plugin": {
       "id": "METER",
       "meterPlugin": {
-        "scanMode": "AUTO_ANALOG_DIGITAL_METER"
+        "scanMode": "SERIAL_NUMBER"
       }
     },
     "cutoutConfig": {
       "style": "rect",
-      "width": 700,
+      "width": 800,
       "alignment": "top_half",
       "ratioFromSize": {
-        "width": 10,
-        "height": 7
+        "width": 5,
+        "height": 1
       },
       "strokeWidth": 2,
       "strokeColor": "FFFFFF",

@@ -1,7 +1,10 @@
 ﻿{
   "camera": {
-    "captureResolution": "720p",
-    "pictureResolution": "Photo"
+    "captureResolution": "2448",
+    "resolutionRatio": {
+      "numerator": 4,
+      "denominator": 3
+    }
   },
   "flash": {
     "mode": "manual",
@@ -14,25 +17,24 @@
     "plugin": {
       "id": "METER",
       "meterPlugin": {
-        "scanMode": "AUTO_ANALOG_DIGITAL_METER"
+        "scanMode": "PHOTO_CAPTURE"
       }
     },
     "cutoutConfig": {
       "style": "rect",
-      "width": 700,
       "alignment": "top_half",
       "ratioFromSize": {
-        "width": 10,
-        "height": 7
+        "width": 125,
+        "height": 200
       },
       "strokeWidth": 2,
       "strokeColor": "FFFFFF",
       "cornerRadius": 4,
       "outerColor": "000000",
-      "outerAlpha": 0.5,
+      "outerAlpha": 0.0,
       "feedbackStrokeColor": "0099FF",
-      "maxWidthPercent": "80%",
-      "maxHeightPercent": "80%",
+      "maxWidthPercent": "25%",
+      "maxHeightPercent": "45%",
       "offset": {
         "x": 0,
         "y": 0
@@ -48,15 +50,15 @@
     },
     "scanFeedback": {
       "style": "CONTOUR_RECT",
-      "strokeColor": "0099FF",
+      "strokeColor": "FFFFFF",
       "strokeWidth": 2,
       "fillColor": "220099FF",
-      "cornerRadius": 2,
+      "cornerRadius": 4,
       "redrawTimeout": 200,
       "animationDuration": 75,
       "animation": "NONE",
       "blinkOnResult": true,
-      "beepOnResult": true,
+      "beepOnResult": false,
       "vibrateOnResult": true,
       "cancelOnResult": true
     }

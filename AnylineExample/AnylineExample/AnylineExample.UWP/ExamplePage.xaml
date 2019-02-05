@@ -9,21 +9,23 @@
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
           x:Name="RootGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
         <Grid.RowDefinitions>
-            <RowDefinition Height="200"/>
+            <RowDefinition Height="260"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <StackPanel HorizontalAlignment="Stretch" x:Name="TopElement" Grid.Row="0" VerticalAlignment="Stretch">
             <Button x:Name="BtnScan" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="15" Content="Open Scanner"/>
             <RadioButton x:Name="RBMeterScan" Content="Meters" IsChecked="True" GroupName="case"/>
             <RadioButton x:Name="RBSerialNumberScan" Content="Serial Number" GroupName="case"/>
-            <RadioButton x:Name="RBPhotoHighRes" Content="Photos (High Res)" GroupName="case"/>
-            <RadioButton x:Name="RBPhotoLowRes" Content="Photos (Low Res)" GroupName="case"/>
+            <RadioButton x:Name="RBBarcode" Content="Barcode" GroupName="case"/>
+            <RadioButton x:Name="RBPhoto" Content="Photoss" GroupName="case"/>
+            <RadioButton x:Name="RBPhotoFar" Content="Photos (Far)" GroupName="case"/>
+            <RadioButton x:Name="RBPhoto1024" Content="Photos (1024p)" GroupName="case"/>
         </StackPanel>
         <Grid x:Name="BottomElement" Grid.Row="1" VerticalAlignment="Stretch">
             <ScrollViewer VerticalScrollBarVisibility="Visible"
                               VerticalScrollMode="Enabled"
                               x:Name="ResultScrollViewer" HorizontalAlignment="Stretch">
-                <ListView x:Name="ResultListView" VerticalAlignment="Top">
+                <ListView x:Name="ResultListView" VerticalAlignment="Top" HorizontalAlignment="Stretch">
                 </ListView>
             </ScrollViewer>
         </Grid>
