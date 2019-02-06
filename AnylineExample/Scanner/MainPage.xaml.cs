@@ -58,12 +58,14 @@ namespace Scanner
 
                     JsonObject config = JsonObject.Parse(dataFromCaller);
                     
+                    // init the Anyline scan view and store the scanViewPlugin
                     AnylineScanView.Init(config, LICENSE_KEY);
                     _scanViewPlugin = AnylineScanView.ScanViewPlugin;
 
-                    // TODO: test if still necessary
+                    // set this only if it is necessary
                     ResourceManager.MemoryCollectionRate = MemoryCollectionRate.Always;
 
+                    // add the result and photoCapture listeners if meter scanning
                     if (_scanViewPlugin is MeterScanViewPlugin)
                     {
                         (_scanViewPlugin as MeterScanViewPlugin).AddScanResultListener(this);
@@ -71,11 +73,14 @@ namespace Scanner
                         (_scanViewPlugin as MeterScanViewPlugin).PhotoCaptureTarget = PhotoCaptureTarget.File;
                     }
 
+                    // add this as result listener if barcode scanning
                     if (_scanViewPlugin is BarcodeScanViewPlugin)
                         (_scanViewPlugin as BarcodeScanViewPlugin).AddScanResultListener(this);
 
+                    // register to the cameraOpened event
                     AnylineScanView.CameraView.CameraOpened += CameraView_CameraOpened;
 
+                    // finally, open the camera
                     AnylineScanView.CameraView.OpenCameraInBackground();
                 }
 
